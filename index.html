@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>จัดตารางเวร Newborn 2569-2570</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Sarabun','Segoe UI',sans-serif; background:#f0f4f8; color:#1a2332; min-height:100vh; }
+.app-header { background:#1e3a5f; color:white; padding:16px 24px; display:flex; align-items:center; gap:12px; box-shadow:0 2px 8px rgba(0,0,0,.2); }
+.app-header h1 { font-size:18px; font-weight:600; }
+.app-header .sub { font-size:12px; opacity:.7; margin-top:2px; }
+.hbadge { margin-left:auto; background:rgba(255,255,255,.15); border-radius:6px; padding:4px 10px; font-size:12px; }
+.step-nav { display:flex; background:white; border-bottom:1px solid #dde3ec; padding:0 24px; overflow-x:auto; }
+.snav { padding:12px 14px; border:none; background:none; cursor:pointer; font-size:13px; color:#6b7c93; border-bottom:3px solid transparent; white-space:nowrap; font-family:inherit; display:flex; align-items:center; gap:6px; }
+.snav.active { color:#1e3a5f; border-bottom-color:#1e7ac7; font-weight:600; }
+.snav.done .snum { background:#27ae60; color:white; }
+.snav:disabled { opacity:.4; cursor:not-allowed; }
+.snum { width:20px; height:20px; border-radius:50%; background:#e8ecf0; color:#6b7c93; font-size:11px; display:flex; align-items:center; justify-content:center; font-weight:700; }
+.snav.active .snum { background:#1e7ac7; color:white; }
+.main { max-width:960px; margin:0 auto; padding:24px 16px; }
+.card { background:white; border-radius:10px; border:1px solid #dde3ec; margin-bottom:16px; overflow:hidden; }
+.card-hd { background:#f7f9fc; border-bottom:1px solid #dde3ec; padding:12px 16px; font-weight:600; font-size:14px; color:#1e3a5f; display:flex; align-items:center; gap:8px; }
+.card-bd { padding:16px; }
+.frow { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:12px; align-items:flex-end; }
+label { font-size:13px; color:#4a5568; margin-bottom:4px; display:block; font-weight:500; }
+select,input { border:1px solid #c8d0db; border-radius:6px; padding:7px 10px; font-size:14px; font-family:inherit; background:white; color:#1a2332; }
+select:focus,input:focus { outline:none; border-color:#1e7ac7; box-shadow:0 0 0 2px rgba(30,122,199,.15); }
+.btn { padding:8px 18px; border-radius:6px; border:none; cursor:pointer; font-size:13px; font-family:inherit; font-weight:600; }
+.btn-p { background:#1e7ac7; color:white; } .btn-p:hover { background:#1565a8; }
+.btn-s { background:#27ae60; color:white; } .btn-s:hover { background:#1e9150; }
+.btn-o { background:white; color:#1e7ac7; border:1.5px solid #1e7ac7; } .btn-o:hover { background:#f0f7ff; }
+.btn-d { background:#e74c3c; color:white; }
+.btn-sm { padding:5px 12px; font-size:12px; }
+.htag { display:inline-flex; align-items:center; gap:6px; background:#fff3cd; border:1px solid #ffc107; color:#856404; border-radius:20px; padding:3px 10px; font-size:12px; margin:3px; }
+.htag button { background:none; border:none; cursor:pointer; color:#856404; padding:0; font-size:14px; }
+.ftbl { width:100%; border-collapse:collapse; font-size:13px; }
+.ftbl th { background:#f0f4f8; padding:8px 10px; text-align:left; border:1px solid #dde3ec; font-size:12px; color:#4a5568; }
+.ftbl td { padding:8px 10px; border:1px solid #dde3ec; vertical-align:middle; }
+.badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:600; }
+.bp { background:#d4edda; color:#155724; } .ba { background:#f8d7da; color:#721c24; } .bh { background:#fff3cd; color:#856404; }
+.stbl { width:100%; border-collapse:collapse; font-size:12.5px; min-width:600px; }
+.stbl th { background:#1e3a5f; color:white; padding:8px 10px; text-align:center; border:1px solid #162d4a; font-size:12px; white-space:nowrap; }
+.stbl td { padding:7px 10px; border:1px solid #dde3ec; text-align:center; vertical-align:middle; }
+.stbl tr.wknd td { background:#fff8f0; }
+.stbl tr.hol td { background:#fff3cd; }
+.chip { display:inline-block; padding:2px 8px; border-radius:12px; font-size:11px; font-weight:600; white-space:nowrap; }
+.cm { background:#dbeafe; color:#1e40af; } .cs { background:#dcfce7; color:#166534; }
+.cr { background:#ede9fe; color:#5b21b6; } .cx { background:#fee2e2; color:#991b1b; border:1px dashed #f87171; }
+.sgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:8px; }
+.scard { background:#f7f9fc; border:1px solid #dde3ec; border-radius:8px; padding:12px; }
+.scard .nm { font-weight:600; font-size:13px; color:#1e3a5f; margin-bottom:8px; }
+.scard .qg { display:grid; grid-template-columns:1fr 1fr; gap:4px; }
+.scard .qi { font-size:11px; color:#4a5568; }
+.qi .u { font-weight:700; color:#1e7ac7; } .qi.ov .u { color:#e74c3c; } .qi.un .u { color:#f39c12; }
+.alert { padding:10px 14px; border-radius:6px; font-size:13px; margin-bottom:10px; }
+.aw { background:#fff3cd; border:1px solid #ffc107; color:#856404; }
+.as { background:#d4edda; border:1px solid #c3e6cb; color:#155724; }
+.ai { background:#cfe2ff; border:1px solid #b6d4fe; color:#084298; }
+.step-act { display:flex; gap:10px; justify-content:flex-end; margin-top:16px; }
+.rsec { border:2px solid #7c3aed; border-radius:8px; padding:12px; background:#faf5ff; }
+.rsec h4 { color:#5b21b6; margin-bottom:8px; font-size:13px; }
+.tsw { position:relative; width:40px; height:22px; display:inline-block; }
+.tsw input { opacity:0; width:0; height:0; }
+.tsl { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#ccc; border-radius:22px; transition:.2s; }
+.tsl:before { content:""; position:absolute; height:16px; width:16px; left:3px; bottom:3px; background:white; border-radius:50%; transition:.2s; }
+.tsw input:checked + .tsl { background:#27ae60; }
+.tsw input:checked + .tsl:before { transform:translateX(18px); }
+.lov { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.4); display:flex; align-items:center; justify-content:center; z-index:999; }
+.lbox { background:white; border-radius:10px; padding:24px 32px; text-align:center; min-width:200px; }
+.spin { width:36px; height:36px; border:3px solid #e0e0e0; border-top-color:#1e7ac7; border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 12px; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.hidden { display:none !important; }
+.mt8 { margin-top:8px; } .mt12 { margin-top:12px; }
+.xs { font-size:11px; } .sm { font-size:13px; } .muted { color:#6b7c93; } .bold { font-weight:700; }
+.sw { overflow-x:auto; }
+</style>
+</head>
+<body>
+<div class="app-header">
+  <div><h1>👶 ระบบจัดตารางเวร Newborn</h1><div class="sub">กุมารเวชศาสตร์ • รามาธิบดี • 2569–2570</div></div>
+</div>
+<div class="step-nav">
+  <button class="snav active" id="nav-1" onclick="goStep(1)"><span class="snum">1</span>เลือกเดือน</button>
+  <button class="snav" id="nav-2" onclick="goStep(2)" disabled><span class="snum">2</span>Quota &amp; Fellow</button>
+  <button class="snav" id="nav-3" onclick="goStep(3)" disabled><span class="snum">3</span>อ.รัชพร</button>
+  <button class="snav" id="nav-4" onclick="goStep(4)" disabled><span class="snum">4</span>Condition</button>
+  <button class="snav" id="nav-5" onclick="goStep(5)" disabled><span class="snum">5</span>ตารางเวร</button>
+</div>
+<div class="main">
+
+<!-- STEP 1 -->
+<div id="step-1">
+  <div class="card">
+    <div class="card-hd">📅 เลือกเดือนที่ต้องการจัดตารางเวร</div>
+    <div class="card-bd">
+      <div class="frow">
+        <div><label>เดือน</label>
+          <select id="sel-month">
+            <option value="7-2569">กรกฎาคม 2569</option>
+            <option value="8-2569">สิงหาคม 2569</option>
+            <option value="9-2569">กันยายน 2569</option>
+            <option value="10-2569">ตุลาคม 2569</option>
+            <option value="11-2569">พฤศจิกายน 2569</option>
+            <option value="12-2569">ธันวาคม 2569</option>
+            <option value="1-2570">มกราคม 2570</option>
+            <option value="2-2570">กุมภาพันธ์ 2570</option>
+            <option value="3-2570">มีนาคม 2570</option>
+            <option value="4-2570">เมษายน 2570</option>
+            <option value="5-2570">พฤษภาคม 2570</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd">🎌 วันหยุดนักขัตฤกษ์ประจำเดือน</div>
+    <div class="card-bd">
+      <div id="hpreset" class="alert ai sm"></div>
+      <div class="frow mt8">
+        <div><label>เพิ่มวันหยุด (วันที่)</label><input type="number" id="hinput" min="1" max="31" placeholder="วันที่" style="width:80px"></div>
+        <div style="align-self:flex-end"><button class="btn btn-o btn-sm" onclick="addHoliday()">+ เพิ่ม</button></div>
+      </div>
+      <div id="htags" class="mt8"></div>
+    </div>
+  </div>
+  <div class="step-act"><button class="btn btn-p" onclick="confirmStep1()">ยืนยัน →</button></div>
+</div>
+
+<!-- STEP 2 -->
+<div id="step-2" class="hidden">
+  <div class="card">
+    <div class="card-hd">👥 Quota เวรประจำเดือนและสถานะ Fellow</div>
+    <div class="card-bd">
+      <div id="qlabel" class="alert ai sm mb8"></div>
+      <table class="ftbl" id="ftbl">
+        <thead><tr><th>Fellow</th><th>สถานะ</th><th>หลักธรรมดา</th><th>SDธรรมดา</th><th>หลักหยุด</th><th>SDหยุด</th><th>รวม</th></tr></thead>
+        <tbody id="ftbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="step-act">
+    <button class="btn btn-o" onclick="goStep(1)">← กลับ</button>
+    <button class="btn btn-p" onclick="confirmStep2()">ยืนยัน →</button>
+  </div>
+</div>
+
+<!-- STEP 3 -->
+<div id="step-3" class="hidden">
+  <div class="card">
+    <div class="card-hd">👩‍⚕️ เวร อ.รัชพร (SD ธรรมดา เท่านั้น)</div>
+    <div class="card-bd">
+      <div class="rsec">
+        <h4>อ.รัชพรปกติรับเวรทุกวันอังคาร — กรุณายืนยันเดือนนี้</h4>
+        <div id="rach-days" class="mt8"></div>
+        <div class="mt8"><label class="sm bold" style="color:#5b21b6">โควต้า SD ธรรมดา อ.รัชพร: <span id="rquota">-</span></label></div>
+        <div class="alert ai xs mt8">✅ เปิด = อยู่ | ปิด = ไม่อยู่ (จะมอบคนอื่น)</div>
+      </div>
+    </div>
+  </div>
+  <div class="step-act">
+    <button class="btn btn-o" onclick="goStep(2)">← กลับ</button>
+    <button class="btn btn-p" onclick="confirmStep3()">ยืนยัน →</button>
+  </div>
+</div>
+
+<!-- STEP 4 -->
+<div id="step-4" class="hidden">
+  <div class="card">
+    <div class="card-hd">🎯 เงื่อนไขพิเศษ (ไม่สะดวก / อยากได้วัน)</div>
+    <div class="card-bd">
+      <div class="alert ai xs">กรอกเฉพาะคนที่มีเงื่อนไข • ระบบจะ accommodate ก่อนแล้วค่อย generate วันที่เหลือ</div>
+      <div id="cond-container" class="mt12"></div>
+      <button class="btn btn-o btn-sm mt8" onclick="addCondition()">+ เพิ่มเงื่อนไข</button>
+    </div>
+  </div>
+  <div class="step-act">
+    <button class="btn btn-o" onclick="goStep(3)">← กลับ</button>
+    <button class="btn btn-s" onclick="generateSchedule()">⚡ Generate ตาราง</button>
+  </div>
+</div>
+
+<!-- STEP 5 -->
+<div id="step-5" class="hidden">
+  <div id="conflicts"></div>
+  <div class="card">
+    <div class="card-hd">
+      📋 ตารางเวร <span id="sched-title"></span>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="btn btn-o btn-sm" onclick="goStep(4)">← แก้ไข</button>
+        <button class="btn btn-s btn-sm" onclick="downloadExcel()">⬇ Excel</button>
+      </div>
+    </div>
+    <div class="card-bd">
+      <div class="sw">
+        <table class="stbl" id="stbl">
+          <thead><tr><th>วัน</th><th>ที่</th><th>หลัก 07:00–19:00</th><th>หลัก 17:00–19:00</th><th>พระเทพ 19:00–07:00</th></tr></thead>
+          <tbody id="stbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd">📊 สรุปจำนวนเวรแต่ละคน</div>
+    <div class="card-bd"><div class="sgrid" id="sgrid"></div></div>
+  </div>
+</div>
+</div>
+
+<div class="lov hidden" id="loading">
+  <div class="lbox"><div class="spin"></div><div style="font-size:14px;color:#4a5568">กำลัง generate ตาราง...</div></div>
+</div>
+
+<script>
+const FELLOWS=[
+  {id:'natnaree',name:'ณัฐนรี',code:'028642'},
+  {id:'watanya',name:'วฑันยา',code:'028727'},
+  {id:'supreeya',name:'สุปรียา',code:'028730'},
+  {id:'sukhpree',name:'สุขปรียา',code:'028729'},
+  {id:'benjaporn',name:'เบญจพร',code:''},
+  {id:'pennarin',name:'เพ็ญนรินทร์',code:''},
+  {id:'tawini',name:'ธาวินี',code:''},
+  {id:'meywadee',name:'เมย์วดี',code:''},
+];
+
+const QUOTA={
+  '7-2569':{natnaree:[3,3,2,2],watanya:[0,0,0,0],supreeya:[4,3,2,2],sukhpree:[3,2,1,2],benjaporn:[3,2,2,2],pennarin:[2,2,1,1],tawini:[3,3,1,1],meywadee:[2,2,2,1],rsd:3,wd:20,hd:11},
+  '8-2569':{natnaree:[2,2,1,1],watanya:[2,2,1,1],supreeya:[3,2,2,2],sukhpree:[3,1,2,1],benjaporn:[2,2,2,1],pennarin:[3,2,1,2],tawini:[3,2,1,2],meywadee:[2,3,1,1],rsd:4,wd:20,hd:11},
+  '9-2569':{natnaree:[0,0,0,0],watanya:[3,3,2,1],supreeya:[5,2,1,2],sukhpree:[3,3,2,1],benjaporn:[4,3,1,1],pennarin:[4,4,1,2],tawini:[0,0,0,0],meywadee:[3,2,1,1],rsd:5,wd:22,hd:8},
+  '10-2569':{natnaree:[2,2,0,2],watanya:[2,1,1,1],supreeya:[2,1,1,1],sukhpree:[2,1,1,1],benjaporn:[4,4,3,2],pennarin:[4,4,3,2],tawini:[0,0,0,0],meywadee:[4,4,2,2],rsd:3,wd:20,hd:11},
+  '11-2569':{natnaree:[4,3,2,1],watanya:[3,2,2,2],supreeya:[1,2,1,2],sukhpree:[4,4,1,1],benjaporn:[4,2,1,1],pennarin:[3,2,1,1],tawini:[2,2,1,1],meywadee:[0,0,0,0],rsd:4,wd:21,hd:9},
+  '12-2569':{natnaree:[3,3,2,2],watanya:[3,2,2,2],supreeya:[3,3,2,2],sukhpree:[3,3,2,2],benjaporn:[0,0,0,0],pennarin:[0,0,0,0],tawini:[4,2,2,1],meywadee:[4,2,1,2],rsd:5,wd:20,hd:11},
+  '1-2570':{natnaree:[4,3,2,2],watanya:[3,3,1,2],supreeya:[3,3,2,1],sukhpree:[0,0,0,0],benjaporn:[3,3,2,2],pennarin:[0,0,0,0],tawini:[3,3,2,2],meywadee:[4,2,2,2],rsd:3,wd:20,hd:11},
+  '2-2570':{natnaree:[4,3,1,1],watanya:[4,2,1,2],supreeya:[2,2,1,0],sukhpree:[2,2,1,1],benjaporn:[2,2,1,1],pennarin:[3,3,1,1],tawini:[3,3,2,2],meywadee:[0,0,0,0],rsd:3,wd:20,hd:8},
+  '3-2570':{natnaree:[0,0,0,0],watanya:[3,4,2,1],supreeya:[0,0,0,0],sukhpree:[4,2,1,2],benjaporn:[3,3,2,2],pennarin:[3,2,2,2],tawini:[4,3,1,2],meywadee:[4,3,2,1],rsd:4,wd:21,hd:10},
+  '4-2570':{natnaree:[3,3,2,2],watanya:[2,2,1,1],supreeya:[2,2,1,1],sukhpree:[2,2,2,2],benjaporn:[0,0,0,0],pennarin:[3,2,2,2],tawini:[3,2,2,2],meywadee:[3,3,2,2],rsd:2,wd:18,hd:12},
+  '5-2570':{natnaree:[3,1,2,1],watanya:[2,2,2,1],supreeya:[3,2,1,1],sukhpree:[2,2,1,1],benjaporn:[2,2,1,2],pennarin:[2,2,2,2],tawini:[3,2,2,2],meywadee:[2,2,1,2],rsd:4,wd:19,hd:12},
+};
+
+const PARTIAL={
+  '8-2569':['natnaree','watanya'],
+  '10-2569':['natnaree','watanya','supreeya','sukhpree'],
+  '11-2569':['supreeya','pennarin','tawini'],
+  '2-2570':['supreeya','sukhpree'],
+  '4-2570':['watanya','supreeya'],
+  '5-2570':['benjaporn','meywadee'],
+};
+
+const PRESET_H={
+  '7-2569':[28,29,30],'8-2569':[12],'9-2569':[],'10-2569':[13,23],
+  '11-2569':[],'12-2569':[7,10,31],'1-2570':[1],'2-2570':[],
+  '3-2570':[1,2],'4-2570':[6,13,14,15],'5-2570':[1,4],
+};
+
+const MINFO={
+  '7-2569':{name:'กรกฎาคม',year:2569,days:31,start:3},
+  '8-2569':{name:'สิงหาคม',year:2569,days:31,start:6},
+  '9-2569':{name:'กันยายน',year:2569,days:30,start:2},
+  '10-2569':{name:'ตุลาคม',year:2569,days:31,start:4},
+  '11-2569':{name:'พฤศจิกายน',year:2569,days:30,start:0},
+  '12-2569':{name:'ธันวาคม',year:2569,days:31,start:2},
+  '1-2570':{name:'มกราคม',year:2570,days:31,start:5},
+  '2-2570':{name:'กุมภาพันธ์',year:2570,days:28,start:1},
+  '3-2570':{name:'มีนาคม',year:2570,days:31,start:1},
+  '4-2570':{name:'เมษายน',year:2570,days:30,start:4},
+  '5-2570':{name:'พฤษภาคม',year:2570,days:31,start:6},
+};
+
+const DAYTH=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+
+let S={
+  month:'7-2569',holidays:[],fellowStatus:{},quotas:{},
+  rachapornDays:[],rachapornQuota:0,conditions:[],schedule:[],remaining:{}
+};
+
+function goStep(n){
+  for(let i=1;i<=5;i++){
+    document.getElementById('step-'+i).classList.toggle('hidden',i!==n);
+    document.getElementById('nav-'+i).classList.toggle('active',i===n);
+  }
+}
+function unlockStep(n){
+  const el=document.getElementById('nav-'+n);
+  el.disabled=false;
+  el.classList.add('done');
+}
+
+document.getElementById('sel-month').addEventListener('change',renderHolidayPreset);
+
+function renderHolidayPreset(){
+  const m=document.getElementById('sel-month').value;
+  S.month=m;
+  const mi=MINFO[m];
+  const pre=PRESET_H[m]||[];
+  document.getElementById('hpreset').innerHTML=
+    `<strong>${mi.name} ${mi.year}</strong> — ${mi.days} วัน`+
+    (pre.length?`<br>วันหยุดนักขัตฤกษ์ที่ตั้งไว้: วันที่ ${pre.join(', ')}`:'<br>ยังไม่มีวันหยุด — เพิ่มด้านล่าง');
+  S.holidays=[...pre];
+  renderHTags();
+}
+
+function renderHTags(){
+  const mi=MINFO[S.month];
+  const tags=S.holidays.sort((a,b)=>a-b).map(d=>{
+    const di=(mi.start+d-1)%7;
+    return `<span class="htag">${d} ${DAYTH[di]}<button onclick="removeH(${d})">×</button></span>`;
+  }).join('');
+  document.getElementById('htags').innerHTML=tags||'<span class="muted xs">ยังไม่มีวันหยุด</span>';
+}
+
+function addHoliday(){
+  const v=parseInt(document.getElementById('hinput').value);
+  if(!v||v<1||v>MINFO[S.month].days){alert('กรุณาระบุวันที่ที่ถูกต้อง');return;}
+  if(!S.holidays.includes(v))S.holidays.push(v);
+  renderHTags();
+  document.getElementById('hinput').value='';
+}
+function removeH(d){S.holidays=S.holidays.filter(x=>x!==d);renderHTags();}
+
+function confirmStep1(){
+  renderHolidayPreset();
+  buildFellowTable();
+  goStep(2);unlockStep(2);
+}
+
+function buildFellowTable(){
+  const m=S.month;
+  const qd=QUOTA[m];
+  const partial=PARTIAL[m]||[];
+  const mi=MINFO[m];
+  document.getElementById('qlabel').innerHTML=
+    `<strong>${mi.name} ${mi.year}</strong> — ธรรมดา ${qd.wd} วัน | หยุด ${qd.hd} วัน | รวม ${mi.days} วัน`;
+  const tbody=document.getElementById('ftbody');
+  tbody.innerHTML='';
+  S.quotas={};S.fellowStatus={};
+
+  FELLOWS.forEach(f=>{
+    const q=qd[f.id]||[0,0,0,0];
+    const isAbs=q[0]===0&&q[1]===0&&q[2]===0&&q[3]===0;
+    const isPart=partial.includes(f.id)&&!isAbs;
+    let sel;
+    if(isAbs){
+      S.fellowStatus[f.id]='absent';
+      sel=`<input type="hidden" id="st-${f.id}" value="absent"><span class="badge ba">ไม่อยู่ทั้งเดือน</span>`;
+    } else if(isPart){
+      S.fellowStatus[f.id]='second_half';
+      sel=`<select id="st-${f.id}" onchange="S.fellowStatus['${f.id}']=this.value" style="font-size:12px;padding:4px 6px">
+        <option value="full">อยู่เต็มเดือน</option>
+        <option value="first_half">ครึ่งแรก (1–15)</option>
+        <option value="second_half" selected>ครึ่งหลัง (16–)</option>
+        <option value="absent">ไม่อยู่เลย</option>
+      </select><span class="badge bh" style="margin-left:4px">*</span>`;
+    } else {
+      S.fellowStatus[f.id]='full';
+      sel=`<select id="st-${f.id}" onchange="S.fellowStatus['${f.id}']=this.value" style="font-size:12px;padding:4px 6px">
+        <option value="full" selected>อยู่เต็มเดือน</option>
+        <option value="first_half">ครึ่งแรก (1–15)</option>
+        <option value="second_half">ครึ่งหลัง (16–)</option>
+        <option value="absent">ไม่อยู่เลย</option>
+      </select>`;
+    }
+    S.quotas[f.id]=[...q];
+    const tot=q.reduce((a,b)=>a+b,0);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><strong>${f.name}</strong>${f.code?`<br><span class="xs muted">${f.code}</span>`:''}</td>
+      <td>${sel}</td>
+      <td><input type="number" id="q-${f.id}-0" value="${q[0]}" min="0" max="20" style="width:48px;font-size:13px;padding:4px" onchange="updQ('${f.id}',0,this.value)"></td>
+      <td><input type="number" id="q-${f.id}-1" value="${q[1]}" min="0" max="20" style="width:48px;font-size:13px;padding:4px" onchange="updQ('${f.id}',1,this.value)"></td>
+      <td><input type="number" id="q-${f.id}-2" value="${q[2]}" min="0" max="20" style="width:48px;font-size:13px;padding:4px" onchange="updQ('${f.id}',2,this.value)"></td>
+      <td><input type="number" id="q-${f.id}-3" value="${q[3]}" min="0" max="20" style="width:48px;font-size:13px;padding:4px" onchange="updQ('${f.id}',3,this.value)"></td>
+      <td id="qt-${f.id}" class="bold">${tot}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function updQ(id,idx,v){
+  S.quotas[id][idx]=parseInt(v)||0;
+  document.getElementById('qt-'+id).textContent=S.quotas[id].reduce((a,b)=>a+b,0);
+}
+
+function confirmStep2(){
+  FELLOWS.forEach(f=>{
+    for(let i=0;i<4;i++){const el=document.getElementById(`q-${f.id}-${i}`);if(el)S.quotas[f.id][i]=parseInt(el.value)||0;}
+    const sel=document.getElementById('st-'+f.id);if(sel&&sel.tagName==='SELECT')S.fellowStatus[f.id]=sel.value;
+  });
+  S.quotas['rachaporn']=[0,QUOTA[S.month].rsd,0,0];
+  buildRachaporn();goStep(3);unlockStep(3);
+}
+
+function buildRachaporn(){
+  const mi=MINFO[S.month];
+  const quota=QUOTA[S.month].rsd;
+  S.rachapornQuota=quota;
+  document.getElementById('rquota').textContent=quota+' เวร';
+  const tues=[];
+  for(let d=1;d<=mi.days;d++){if((mi.start+d-1)%7===2)tues.push(d);}
+  let html='<div style="display:flex;flex-direction:column;gap:8px">';
+  tues.forEach(d=>{
+    const isHol=S.holidays.includes(d);
+    const chk=isHol?'':'checked';
+    html+=`<label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+      <label class="tsw"><input type="checkbox" id="rach-${d}" ${chk} onchange="syncRach()"><span class="tsl"></span></label>
+      <span class="sm"><strong>วันที่ ${d}</strong> อังคาร${isHol?' <span class="badge" style="background:#cfe2ff;color:#084298">หยุดนักขัตฤกษ์</span>':''}</span>
+    </label>`;
+  });
+  html+='</div>';
+  document.getElementById('rach-days').innerHTML=html;
+  syncRach();
+}
+
+function syncRach(){
+  const mi=MINFO[S.month];
+  const days=[];
+  for(let d=1;d<=mi.days;d++){
+    if((mi.start+d-1)%7===2){const cb=document.getElementById('rach-'+d);if(cb&&cb.checked)days.push(d);}
+  }
+  S.rachapornDays=days;
+  const q=S.rachapornQuota;
+  const note=days.length!==q?` <span style="color:#e74c3c">⚠️ ${days.length} วัน ≠ โควต้า ${q}</span>`
+    :` <span style="color:#27ae60">✅ ครบ</span>`;
+  document.getElementById('rquota').innerHTML=q+' เวร'+note;
+}
+
+function confirmStep3(){syncRach();buildConditions();goStep(4);unlockStep(4);}
+
+function buildConditions(){S.conditions=[];document.getElementById('cond-container').innerHTML='';}
+
+function addCondition(){
+  const mi=MINFO[S.month];
+  const idx=S.conditions.length;
+  S.conditions.push({fellowId:FELLOWS[0].id,type:'avoid',dates:[],shift:'any'});
+  const div=document.createElement('div');
+  div.className='card';div.id='cond-'+idx;
+  const avFellows=FELLOWS.filter(f=>S.fellowStatus[f.id]!=='absent');
+  div.innerHTML=`<div class="card-bd" style="display:flex;flex-direction:column;gap:10px">
+    <div class="frow" style="align-items:flex-end">
+      <div><label>Fellow</label><select onchange="S.conditions[${idx}].fellowId=this.value" style="font-size:13px;padding:6px 8px">
+        ${avFellows.map(f=>`<option value="${f.id}">${f.name}</option>`).join('')}
+      </select></div>
+      <div><label>ประเภท</label><select onchange="S.conditions[${idx}].type=this.value" style="font-size:13px;padding:6px 8px">
+        <option value="avoid">❌ ไม่สะดวก</option><option value="want">✅ อยากได้</option>
+      </select></div>
+      <div><label>เวร</label><select onchange="S.conditions[${idx}].shift=this.value" style="font-size:13px;padding:6px 8px">
+        <option value="any">ทุกประเภท</option><option value="main">หลักเท่านั้น</option><option value="sd">SD เท่านั้น</option>
+      </select></div>
+      <button class="btn btn-d btn-sm" onclick="removeCond(${idx})">ลบ</button>
+    </div>
+    <div><label class="sm">วันที่ (คลิกเลือก)</label>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">
+        ${Array.from({length:mi.days},(_,i)=>{
+          const d=i+1,di=(mi.start+i)%7;
+          const isW=di===0||di===6,isH=S.holidays.includes(d);
+          const bg=isH?'#fff3cd':isW?'#fff8f0':'white';
+          return `<button id="dpb-${idx}-${d}" onclick="togDate(${idx},${d},this)"
+            style="width:34px;height:34px;border-radius:6px;border:1.5px solid #c8d0db;background:${bg};
+              font-size:11px;cursor:pointer;font-family:inherit;font-weight:600;color:#1a2332;line-height:1.2">
+            ${d}<br><span style="font-size:9px;font-weight:400;color:#6b7c93">${DAYTH[di].charAt(0)}</span>
+          </button>`;
+        }).join('')}
+      </div>
+    </div>
+  </div>`;
+  document.getElementById('cond-container').appendChild(div);
+}
+
+function togDate(idx,d,btn){
+  const c=S.conditions[idx];
+  if(c.dates.includes(d)){c.dates=c.dates.filter(x=>x!==d);btn.style.borderColor='#c8d0db';btn.style.boxShadow='';}
+  else{c.dates.push(d);btn.style.borderColor=c.type==='avoid'?'#e74c3c':'#27ae60';btn.style.boxShadow=`0 0 0 2px ${c.type==='avoid'?'rgba(231,76,60,.2)':'rgba(39,174,96,.2)'}`;}
+}
+function removeCond(idx){document.getElementById('cond-'+idx).remove();S.conditions[idx]=null;}
+
+function generateSchedule(){
+  document.getElementById('loading').classList.remove('hidden');
+  setTimeout(()=>{try{_gen();}finally{document.getElementById('loading').classList.add('hidden');}},50);
+}
+
+function _gen(){
+  const mi=MINFO[S.month];
+  const conds=S.conditions.filter(Boolean);
+
+  // ---- helpers ----
+  function avail(fid,d){
+    const s=S.fellowStatus[fid];
+    if(s==='absent')return false;
+    if(s==='first_half'&&d>15)return false;
+    if(s==='second_half'&&d<=15)return false;
+    return true;
+  }
+  function qiOf(shift,isH){ return shift==='main'?(isH?2:0):(isH?3:1); }
+
+  // ---- build days ----
+  const days=[];
+  for(let d=1;d<=mi.days;d++){
+    const di=(mi.start+d-1)%7;
+    const isW=di===0||di===6;
+    const isH=S.holidays.includes(d)||isW;
+    days.push({date:d,dayIdx:di,isHoliday:isH,main:null,sd:null});
+  }
+  const actF=FELLOWS.filter(f=>S.fellowStatus[f.id]!=='absent').map(f=>f.id);
+
+  // ---- want / avoid maps ----
+  const wM={},wS={},aM={},aS={};
+  conds.forEach(c=>{
+    c.dates.forEach(d=>{
+      if(c.type==='want'){
+        if(c.shift==='main'||c.shift==='any'){(wM[d]=wM[d]||[]).push(c.fellowId);}
+        if(c.shift==='sd'||c.shift==='any'){(wS[d]=wS[d]||[]).push(c.fellowId);}
+      }else{
+        if(c.shift==='main'||c.shift==='any'){(aM[d]=aM[d]||[]).push(c.fellowId);}
+        if(c.shift==='sd'||c.shift==='any'){(aS[d]=aS[d]||[]).push(c.fellowId);}
+      }
+    });
+  });
+  function isAvoid(fid,d,shift){
+    const m=shift==='main'?aM:aS; return (m[d]||[]).includes(fid);
+  }
+  function isWant(fid,d,shift){
+    const m=shift==='main'?wM:wS; return (m[d]||[]).includes(fid);
+  }
+
+  // ---- feasibility pre-check ----
+  let demand={mwd:0,swd:0,mhd:0,shd:0};
+  days.forEach(di=>{ if(di.isHoliday){demand.mhd++;demand.shd++;}else{demand.mwd++;demand.swd++;} });
+  let rachCov=0;
+  S.rachapornDays.forEach(d=>{ const di=days.find(x=>x.date===d); if(di&&!di.isHoliday)rachCov++; });
+  let supply={mwd:0,swd:rachCov,mhd:0,shd:0};
+  FELLOWS.forEach(f=>{
+    const q=S.quotas[f.id]||[0,0,0,0];
+    supply.mwd+=q[0];supply.swd+=q[1];supply.mhd+=q[2];supply.shd+=q[3];
+  });
+  S.feasIssues=[];
+  const catNames={mwd:'หลักธรรมดา',swd:'SDธรรมดา',mhd:'หลักหยุด',shd:'SDหยุด'};
+  ['mwd','swd','mhd','shd'].forEach(k=>{
+    if(supply[k]<demand[k]) S.feasIssues.push(`${catNames[k]}: ต้องการ ${demand[k]} เวร แต่โควต้ารวมมีแค่ ${supply[k]} → ขาด ${demand[k]-supply[k]} เวร`);
+    if(supply[k]>demand[k]) S.feasIssues.push(`${catNames[k]}: โควต้ารวม ${supply[k]} เวร มากกว่าจำนวนวัน ${demand[k]} → เกิน ${supply[k]-demand[k]} เวร`);
+  });
+
+  // ---- consecutive helpers ----
+  function dset(fid){ const s=[]; days.forEach(di=>{ if(di.main===fid||di.sd===fid)s.push(di.date); }); return s; }
+  function maxRun(arr){ const ds=[...arr].sort((a,b)=>a-b); let run=ds.length?1:0,mx=run; for(let i=1;i<ds.length;i++){ if(ds[i]===ds[i-1]+1){run++;mx=Math.max(mx,run);}else run=1;} return mx; }
+  function runs3(arr){ const ds=[...arr].sort((a,b)=>a-b); let c=0; for(let i=2;i<ds.length;i++){ if(ds[i]===ds[i-1]+1&&ds[i-1]===ds[i-2]+1)c++; } return c; }
+  function okAdd(fid,d){ const s=dset(fid); s.push(d); return maxRun(s)<=2; }
+
+  // ---- PHASE 0: place rachaporn on chosen tuesdays (SD workday) ----
+  const rem={};
+  FELLOWS.forEach(f=>{ rem[f.id]=[...(S.quotas[f.id]||[0,0,0,0])]; });
+  rem['rachaporn']=[0,S.rachapornQuota,0,0];
+  S.rachapornDays.forEach(d=>{
+    const di=days.find(x=>x.date===d);
+    if(di&&!di.isHoliday&&rem['rachaporn'][1]>0){ di.sd='rachaporn'; rem['rachaporn'][1]--; }
+  });
+
+  // ---- PHASE 1: honor "want" requests first (greedy, respect quota+consec+avail) ----
+  function tryPlaceWant(d,shift){
+    const di=days.find(x=>x.date===d);
+    if((shift==='main'&&di.main)||(shift==='sd'&&di.sd))return;
+    const isH=di.isHoliday, qi=qiOf(shift,isH);
+    const wl=(shift==='main'?wM[d]:wS[d])||[];
+    for(const fid of wl){
+      if(fid==='rachaporn')continue;
+      if(rem[fid][qi]<=0||!avail(fid,d))continue;
+      if(di.main===fid||di.sd===fid)continue;
+      if(!okAdd(fid,d))continue;
+      di[shift]=fid; rem[fid][qi]--; return;
+    }
+  }
+  days.forEach(di=>{ tryPlaceWant(di.date,'main'); tryPlaceWant(di.date,'sd'); });
+
+  // ---- PHASE 2: fill remaining via dynamic MRV (most-constrained slot first) ----
+  function candList(d,shift){
+    const di=days.find(x=>x.date===d), isH=di.isHoliday, qi=qiOf(shift,isH);
+    const out=[];
+    for(const fid of actF){
+      if(rem[fid][qi]<=0||!avail(fid,d))continue;
+      if(di.main===fid||di.sd===fid)continue;
+      if(isAvoid(fid,d,shift))continue;       // respect avoid in fill phase
+      if(!okAdd(fid,d))continue;
+      out.push(fid);
+    }
+    return out;
+  }
+  function openSlots(){
+    const s=[];
+    days.forEach(di=>{ if(!di.main)s.push([di.date,'main']); if(!di.sd)s.push([di.date,'sd']); });
+    return s;
+  }
+  let guard=0;
+  while(true){
+    const slots=openSlots();
+    if(slots.length===0)break;
+    if(guard++>2000)break;
+    // pick slot with fewest candidates
+    let best=null,bestC=null,bestN=1e9;
+    for(const sl of slots){
+      const c=candList(sl[0],sl[1]);
+      if(c.length<bestN){bestN=c.length;best=sl;bestC=c;}
+    }
+    const [d,shift]=best;
+    const di=days.find(x=>x.date===d), isH=di.isHoliday, qi=qiOf(shift,isH);
+    if(bestC.length===0){
+      // relax: drop avoid, then drop consec
+      let relaxed=actF.filter(fid=>rem[fid][qi]>0&&avail(fid,d)&&di.main!==fid&&di.sd!==fid&&okAdd(fid,d));
+      if(relaxed.length===0) relaxed=actF.filter(fid=>rem[fid][qi]>0&&avail(fid,d)&&di.main!==fid&&di.sd!==fid);
+      if(relaxed.length===0){
+        // mark as filled-impossible to avoid infinite loop
+        di[shift]='__none__'; continue;
+      }
+      relaxed.sort((a,b)=>rem[b][qi]-rem[a][qi]);
+      di[shift]=relaxed[0]; rem[relaxed[0]][qi]--;
+      continue;
+    }
+    // prefer want, then balance: most remaining quota + spread
+    bestC.sort((a,b)=>{
+      const wa=isWant(a,d,shift)?1:0, wb=isWant(b,d,shift)?1:0;
+      if(wa!==wb)return wb-wa;
+      return rem[b][qi]-rem[a][qi];
+    });
+    di[shift]=bestC[0]; rem[bestC[0]][qi]--;
+  }
+  // clean placeholder
+  days.forEach(di=>{ if(di.main==='__none__')di.main=null; if(di.sd==='__none__')di.sd=null; });
+
+  // ---- PHASE 3: simulated annealing to remove 3-consecutive (swap within same quota-category) ----
+  function rnd(n){return Math.floor(Math.random()*n);}
+  let cur=0; actF.forEach(fid=>{cur+=runs3(dset(fid));});
+  let T=3.0;
+  const t0=Date.now();
+  while(cur>0 && Date.now()-t0<1500){
+    T=Math.max(T*0.9999,0.05);
+    const di1=days[rnd(days.length)], sh1=Math.random()<0.5?'main':'sd';
+    const di2=days[rnd(days.length)], sh2=Math.random()<0.5?'main':'sd';
+    const f1=di1[sh1], f2=di2[sh2];
+    if(!f1||!f2||f1===f2||f1==='rachaporn'||f2==='rachaporn')continue;
+    if(qiOf(sh1,di1.isHoliday)!==qiOf(sh2,di2.isHoliday))continue;
+    if(!avail(f2,di1.date)||!avail(f1,di2.date))continue;
+    if(di1.main===f2||di1.sd===f2||di2.main===f1||di2.sd===f1)continue;
+    // don't introduce avoid violations
+    if(isAvoid(f2,di1.date,sh1)||isAvoid(f1,di2.date,sh2))continue;
+    const before=runs3(dset(f1))+runs3(dset(f2));
+    di1[sh1]=f2; di2[sh2]=f1;
+    const after=runs3(dset(f1))+runs3(dset(f2));
+    const delta=after-before;
+    if(delta<=0 || Math.random()<Math.exp(-delta/T)){ cur+=delta; }
+    else { di1[sh1]=f1; di2[sh2]=f2; }
+  }
+
+  S.schedule=days; S.remaining=rem;
+  renderSched(); renderSum(); renderConflicts();
+  goStep(5); unlockStep(5);
+  document.getElementById('sched-title').textContent=`${mi.name} ${mi.year}`;
+}
+
+function fname(id){
+  if(!id)return '—';
+  if(id==='rachaporn')return 'อ.รัชพร';
+  const f=FELLOWS.find(x=>x.id===id);return f?f.name:id;
+}
+
+function renderSched(){
+  const tbody=document.getElementById('stbody');
+  tbody.innerHTML='';
+  S.schedule.forEach(di=>{
+    const isW=di.dayIdx===0||di.dayIdx===6;
+    const isHonly=S.holidays.includes(di.date)&&!isW;
+    let rc=isHonly?'hol':isW?'wknd':'';
+    const mc=di.main?`<span class="chip cm">${fname(di.main)}</span>`:`<span class="chip cx">ไม่มีเวร!</span>`;
+    const sc=di.sd?`<span class="chip ${di.sd==='rachaporn'?'cr':'cs'}">${fname(di.sd)}</span>`:`<span class="chip cx">ไม่มีเวร!</span>`;
+    const hf=S.holidays.includes(di.date)?' 🎌':'';
+    const tr=document.createElement('tr');
+    tr.className=rc;
+    tr.innerHTML=`<td style="text-align:left">${DAYTH[di.dayIdx]}${hf}</td>
+      <td style="font-weight:700;color:#1e3a5f">${di.date}</td>
+      <td>${mc}</td><td>${mc}</td><td>${sc}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderSum(){
+  const grid=document.getElementById('sgrid');grid.innerHTML='';
+  const all=[...FELLOWS,{id:'rachaporn',name:'อ.รัชพร',code:''}];
+  all.forEach(f=>{
+    const tgt=S.quotas[f.id]||[0,0,0,0];
+    const used=[0,0,0,0];
+    S.schedule.forEach(di=>{
+      const h=di.isHoliday;
+      if(di.main===f.id)used[h?2:0]++;
+      if(di.sd===f.id)used[h?3:1]++;
+    });
+    const totT=tgt.reduce((a,b)=>a+b,0),totU=used.reduce((a,b)=>a+b,0);
+    if(totT===0&&totU===0)return;
+    const labels=['หลักธ','SDธ','หลักห','SDห'];
+    const qhtml=labels.map((l,i)=>{
+      const cls=used[i]>tgt[i]?'ov':used[i]<tgt[i]?'un':'';
+      return `<div class="qi ${cls}"><span class="u">${used[i]}</span>/<span style="color:#6b7c93">${tgt[i]}</span> <span style="font-size:10px;color:#6b7c93">${l}</span></div>`;
+    }).join('');
+    const tc=totU!==totT?'color:#e74c3c':'color:#27ae60';
+    const card=document.createElement('div');
+    card.className='scard';
+    card.innerHTML=`<div class="nm">${f.name}</div><div class="qg">${qhtml}</div>
+      <div style="margin-top:6px;font-size:12px;font-weight:700;${tc}">รวม ${totU}/${totT}</div>`;
+    grid.appendChild(card);
+  });
+}
+
+function renderConflicts(){
+  const c=document.getElementById('conflicts');c.innerHTML='';
+  const issues=[];
+  // feasibility warnings (quota vs slots) shown separately and prominently
+  if(S.feasIssues&&S.feasIssues.length){
+    c.innerHTML=`<div class="alert aw"><strong>⚠️ โควต้าไม่สมดุลกับจำนวนวันในเดือนนี้ — แก้ที่ Step 2 ก่อน:</strong>
+      <ul style="margin-top:6px;list-style:none">${S.feasIssues.map(i=>`<li style="padding:4px 0;font-size:12px">• ${i}</li>`).join('')}</ul>
+      <div style="margin-top:6px;font-size:12px">ระบบจะ generate ให้ดีที่สุดเท่าที่โควต้าอนุญาต แต่บางช่องอาจว่างหรือเวรไม่ครบ</div></div>`;
+  }
+  // unfilled
+  S.schedule.forEach(di=>{
+    if(!di.main)issues.push(`วันที่ ${di.date} ${DAYTH[di.dayIdx]}: ไม่มีแพทย์เวรหลัก`);
+    if(!di.sd)issues.push(`วันที่ ${di.date} ${DAYTH[di.dayIdx]}: ไม่มีแพทย์เวรพระเทพ`);
+  });
+  // quota mismatch
+  FELLOWS.forEach(f=>{
+    const tgt=S.quotas[f.id]||[0,0,0,0];
+    const used=[0,0,0,0];
+    S.schedule.forEach(di=>{const h=di.isHoliday;if(di.main===f.id)used[h?2:0]++;if(di.sd===f.id)used[h?3:1]++;});
+    const diff=tgt.reduce((a,b)=>a+b,0)-used.reduce((a,b)=>a+b,0);
+    if(diff>0)issues.push(`${fname(f.id)}: เวรยังขาด ${diff} ครั้ง (โควต้าไม่ครบ)`);
+    if(diff<0)issues.push(`${fname(f.id)}: เวรเกิน ${Math.abs(diff)} ครั้ง`);
+  });
+  // consecutive
+  FELLOWS.forEach(f=>{
+    const dates=[...new Set([...S.schedule.filter(di=>di.main===f.id||di.sd===f.id).map(di=>di.date)])].sort((a,b)=>a-b);
+    for(let i=2;i<dates.length;i++){
+      if(dates[i]===dates[i-1]+1&&dates[i-1]===dates[i-2]+1){
+        issues.push(`⚠️ ${fname(f.id)}: เวร 3 วันติด (${dates[i-2]}, ${dates[i-1]}, ${dates[i]})`);
+      }
+    }
+  });
+  // condition violations
+  S.conditions.filter(Boolean).forEach(co=>{
+    co.dates.forEach(d=>{
+      if(co.type==='avoid'){
+        const di=S.schedule.find(x=>x.date===d);if(!di)return;
+        if((co.shift==='main'||co.shift==='any')&&di.main===co.fellowId)
+          issues.push(`❌ ${fname(co.fellowId)} ถูกลงเวรหลักวันที่ ${d} ทั้งที่ขอหลีกเลี่ยง`);
+        if((co.shift==='sd'||co.shift==='any')&&di.sd===co.fellowId)
+          issues.push(`❌ ${fname(co.fellowId)} ถูกลงเวร SD วันที่ ${d} ทั้งที่ขอหลีกเลี่ยง`);
+      }
+    });
+  });
+
+  if(issues.length===0){c.innerHTML='<div class="alert as">✅ ตารางเวรสมบูรณ์ ไม่มีปัญหา</div>';}
+  else{c.innerHTML=`<div class="alert aw"><strong>⚠️ พบปัญหา ${issues.length} รายการ:</strong><ul style="margin-top:6px;list-style:none">${issues.map(i=>`<li style="padding:4px 0;border-bottom:1px solid #f0f0f0;font-size:12px">• ${i}</li>`).join('')}</ul></div>`;}
+}
+
+function downloadExcel(){
+  const mi=MINFO[S.month];
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet([
+    [`ตารางแพทย์เวรกุมารเวชศาสตร์ Ward (Newborn)`],
+    [`ประจำเดือน ${mi.name} ${mi.year}`],[],
+    ['วัน','วันที่','07:00-19:00 (หลัก)','17:00-19:00 (หลัก)','19:00-07:00 (พระเทพ)','หมายเหตุ'],
+    ...S.schedule.map(di=>{
+      const isW=di.dayIdx===0||di.dayIdx===6,isH=S.holidays.includes(di.date);
+      const note=isH&&!isW?'หยุดนักขัตฤกษ์':isW?'หยุด':'';
+      return[DAYTH[di.dayIdx],di.date,fname(di.main),fname(di.main),fname(di.sd),note];
+    }),
+    [],[' สรุปจำนวนเวร'],
+    ['ชื่อ','หลักธรรมดา','SDธรรมดา','หลักหยุด','SDหยุด','รวม'],
+    ...[...FELLOWS,{id:'rachaporn',name:'อ.รัชพร'}].map(f=>{
+      const tgt=S.quotas[f.id]||[0,0,0,0];
+      const used=[0,0,0,0];
+      S.schedule.forEach(di=>{const h=di.isHoliday;if(di.main===f.id)used[h?2:0]++;if(di.sd===f.id)used[h?3:1]++;});
+      if(tgt.reduce((a,b)=>a+b,0)===0&&used.reduce((a,b)=>a+b,0)===0)return null;
+      return[f.name,used[0],used[1],used[2],used[3],used.reduce((a,b)=>a+b,0)];
+    }).filter(Boolean),
+  ]);
+  ws['!cols']=[{wch:12},{wch:6},{wch:16},{wch:16},{wch:16},{wch:16}];
+  XLSX.utils.book_append_sheet(wb,ws,`${mi.name}${mi.year}`);
+  XLSX.writeFile(wb,`ตารางเวร_Newborn_${mi.name}${mi.year}.xlsx`);
+}
+
+renderHolidayPreset();
+</script>
+</body>
+</html>
